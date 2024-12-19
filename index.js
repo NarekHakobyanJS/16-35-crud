@@ -1,30 +1,20 @@
 const express = require('express')
-const {readHtml, readUsers} = require('./middleware/readFile')
-const {checkCase} = require("./middleware/forPost")
+require('dotenv').config()
+const homeRoute = require('./routes/index')
+const userRoute = require('./routes/users')
+
 const app = express()
 
+const PORT = process.env.PORT || 3000
 app.use(express.json())
 app.use(express.static('pages'))
 
-app.get('/', readHtml, (req, res) => {
-    const {homePage} = res.locals
-    res.set({
-        'content-type' : 'text/html',
-        'cache-control' : 'no-store'
-    })
-    res.status(200).send(homePage)
-});
+app.use('/', homeRoute)
+app.use('/users', userRoute)
 
-app.get('/users', readUsers, (req, res) => {
-    const {users} = res.locals;
-    res.json(users)
+app.all('*',function(req, res) {
+    res.status(400).json({"msg" : "Invalid URL"})
 })
-
-app.post('/users', readUsers, checkCase, (req, res) => {
-    
-    console.log(req.body);
-})
-
 
 // fetch('http://localhost:3000/users', {
 //     method : "POST",
@@ -33,4 +23,4 @@ app.post('/users', readUsers, checkCase, (req, res) => {
 //     },
 //     body : JSON.stringify({name : "Alik", age : 34})
 // })
-app.listen(3000, () => console.log('server is Running!'))
+app.listen(PORT, () => console.log(`server is Running! ${PORT}`))
